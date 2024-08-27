@@ -1,0 +1,298 @@
+<html><head><base href="https://example.com/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>零极限清理 - 互动版</title>
+<style>
+  body, html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    transition: background 0.5s ease;
+    overflow: hidden;
+  }
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
+  #start-btn, #name-submit {
+    font-size: 1.2em;
+    padding: 15px 30px;
+    margin: 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+
+  #start-btn:hover, #name-submit:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+  }
+
+  #name-input {
+    font-size: 1.2em;
+    padding: 15px;
+    margin: 15px;
+    border: 2px solid #4CAF50;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    width: 80%;
+    max-width: 300px;
+  }
+
+  #name-input:focus {
+    outline: none;
+    box-shadow: 0 0 10px #4CAF50;
+  }
+
+  #message-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 60vh;
+    width: 90%;
+    max-width: 350px;
+    text-align: center;
+  }
+
+  .message {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin: 10px 0;
+    opacity: 0;
+    transition: all 0.5s ease;
+    transform: translateY(20px);
+  }
+
+  .message.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  #name-container {
+    display: none;
+    width: 100%;
+    text-align: center;
+  }
+
+  #restart-hint {
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.9em;
+    color: #666;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  .particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0px); }
+  }
+
+  .particle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    animation: float 3s infinite ease-in-out;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <button id="start-btn">开始零极限清理</button>
+
+    <div id="name-container">
+      <input type="text" id="name-input" placeholder="请输入你的名字">
+      <button id="name-submit">确定</button>
+    </div>
+
+    <div id="message-container"></div>
+
+    <div id="restart-hint">点击空白处重新开始</div>
+  </div>
+
+  <div class="particles"></div>
+
+  <script>
+    const startBtn = document.getElementById('start-btn');
+    const nameContainer = document.getElementById('name-container');
+    const nameInput = document.getElementById('name-input');
+    const nameSubmit = document.getElementById('name-submit');
+    const messageContainer = document.getElementById('message-container');
+    const restartHint = document.getElementById('restart-hint');
+    const container = document.querySelector('.container');
+    const particlesContainer = document.querySelector('.particles');
+
+    const messages = [
+      '对不起',
+      '原谅我',
+      '谢谢你',
+      '我爱你'
+    ];
+
+    let currentMessageIndex = 0;
+    let isAnimating = false;
+
+    startBtn.addEventListener('click', () => {
+      startBtn.style.display = 'none';
+      nameContainer.style.display = 'block';
+      nameInput.focus();
+      createParticles();
+    });
+
+    nameSubmit.addEventListener('click', submitName);
+
+    nameInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        submitName();
+      }
+    });
+
+    function submitName() {
+      const name = nameInput.value.trim();
+      if (name) {
+        nameContainer.style.display = 'none';
+        showMessages(name);
+      } else {
+        alert('请输入你的名字');
+      }
+    }
+
+    function showMessages(name) {
+      messageContainer.innerHTML = '';
+      messages.forEach((message, index) => {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+        messageElement.textContent = index === 0 ? `${name}，${message}` : message;
+        messageContainer.appendChild(messageElement);
+      });
+
+      animateMessages();
+    }
+
+    function animateMessages() {
+      isAnimating = true;
+      const messageElements = document.querySelectorAll('.message');
+      messageElements.forEach((element, index) => {
+        setTimeout(() => {
+          element.classList.add('visible');
+          if (index === messageElements.length - 1) {
+            isAnimating = false;
+            restartHint.style.opacity = 1;
+          }
+        }, index * 1000);
+      });
+    }
+
+    function resetApp() {
+      if (isAnimating) return;
+      
+      nameInput.value = '';
+      messageContainer.innerHTML = '';
+      startBtn.style.display = 'block';
+      nameContainer.style.display = 'none';
+      restartHint.style.opacity = 0;
+      removeParticles();
+    }
+
+    container.addEventListener('click', (e) => {
+      if (e.target === container) {
+        resetApp();
+      }
+    });
+
+    function changeBackgroundColor() {
+      const hue = Math.floor(Math.random() * 360);
+      document.body.style.background = `linear-gradient(135deg, hsl(${hue}, 100%, 90%) 0%, hsl(${hue}, 100%, 80%) 100%)`;
+    }
+
+    setInterval(changeBackgroundColor, 5000);
+
+    function addClickEffect(button) {
+      button.addEventListener('touchstart', () => {
+        button.style.transform = 'scale(0.95)';
+      });
+      button.addEventListener('touchend', () => {
+        button.style.transform = 'scale(1)';
+      });
+    }
+
+    addClickEffect(startBtn);
+    addClickEffect(nameSubmit);
+
+    function createParticles() {
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+        particle.style.left = `${Math.random() * 100}%`;
+        particle.style.top = `${Math.random() * 100}%`;
+        particle.style.animationDelay = `${Math.random() * 2}s`;
+        particlesContainer.appendChild(particle);
+      }
+    }
+
+    function removeParticles() {
+      particlesContainer.innerHTML = '';
+    }
+
+    // 添加触摸效果
+    document.addEventListener('touchmove', (e) => {
+      const touch = e.touches[0];
+      const ripple = document.createElement('div');
+      ripple.classList.add('particle');
+      ripple.style.left = `${touch.clientX}px`;
+      ripple.style.top = `${touch.clientY}px`;
+      particlesContainer.appendChild(ripple);
+
+      setTimeout(() => {
+        ripple.remove();
+      }, 1000);
+    });
+
+    // 添加文字缩放动画
+    function pulseText() {
+      const messages = document.querySelectorAll('.message');
+      messages.forEach((message, index) => {
+        setTimeout(() => {
+          message.style.transform = 'scale(1.1)';
+          setTimeout(() => {
+            message.style.transform = 'scale(1)';
+          }, 150);
+        }, index * 200);
+      });
+    }
+
+    setInterval(pulseText, 3000);
+  </script>
+</body>
+</html>
